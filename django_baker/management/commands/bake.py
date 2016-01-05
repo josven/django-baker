@@ -60,4 +60,5 @@ class Command(BaseCommand):
             except:
                 raise CommandError("One or more of the models you entered for %s are incorrect." % app_label)
         else:
-            return apps.get_models(app_label)
+            config = apps.get_app_config('team')
+            return [model_class for model_class in config.get_models()]
