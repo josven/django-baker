@@ -1,8 +1,11 @@
 from __future__ import print_function
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import get_app, get_models
-from django.db.models.loading import get_model
+
+from django.apps import apps
+
+# from django.db.models import get_app, get_models
+# from django.db.models.loading import get_model
 from ...bakery import Baker
 
 
@@ -38,7 +41,7 @@ class Command(BaseCommand):
             Gets the app and models when given app_label and model names
         """
         try:
-            app = get_app(app_label)
+            app = apps.get_app_config(app_label).models_module
         except ImproperlyConfigured:
             raise CommandError("%s is ImproperlyConfigured - did you remember to add %s to settings.INSTALLED_APPS?" %
                                (app_label, app_label))
@@ -53,8 +56,8 @@ class Command(BaseCommand):
         if model_names:
             try:
                 print(app_label, model_names)
-                return [get_model(app_label, model_name) for model_name in model_names]
+                return [apps.get_model('{app_label}.{model_name}'.format(app_label=app_label, model_name=model_name)) for model_name in model_names]
             except:
                 raise CommandError("One or more of the models you entered for %s are incorrect." % app_label)
         else:
-            return get_models(app)
+            return apps.get_models(app_label)
